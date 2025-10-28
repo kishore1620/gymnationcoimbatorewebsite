@@ -1,0 +1,11 @@
+.presence-container {
+  max-width: 500px;
+}
+
+.attendance-card {
+  border: 2px solid #ff5e00;
+}
+
+.btn-warning, .btn-outline-warning {
+  min-width: 140px;
+}

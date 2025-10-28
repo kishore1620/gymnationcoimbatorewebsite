@@ -1,0 +1,159 @@
+/* General page */
+.login-page {
+  background-color: black;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
+}
+
+/* Login box */
+.login-box {
+  background-color: #1a1a1a;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(255, 102, 0, 0.4);
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+
+/* Title */
+.login-title {
+  color: #ff6600;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+/* Messages */
+.login-message {
+  color: #fff;
+  padding: 0.5rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.login-message.success {
+  background-color: #28a745;
+}
+
+.login-message.error {
+  background-color: #dc3545;
+}
+
+/* Inputs */
+.login-input {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  border: 1px solid #333;
+  background-color: #0d0d0d;
+  color: #ccc;
+  transition: all 0.3s ease;
+}
+
+.login-input::placeholder {
+  color: #888;
+  transition: color 0.3s ease;
+}
+
+.login-input:focus {
+  outline: none;
+  border-color: #ff6600;
+  color: #fff;
+}
+
+.login-input:focus::placeholder {
+  color: #fff;
+}
+
+/* Password toggle */
+.password-wrapper {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #ff6600;
+  font-size: 0.9rem;
+  user-select: none;
+  transition: color 0.3s ease;
+}
+
+.toggle-password:hover {
+  color: #ffa14d;
+}
+
+/* Button */
+.login-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #ff6600;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.login-btn:hover {
+  background-color: #ff8533;
+  transform: translateY(-2px);
+}
+
+/* Footer */
+.login-footer {
+  margin-top: 1rem;
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+.login-link {
+  color: #ff6600;
+  cursor: pointer;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.login-link:hover {
+  color: #ffa14d;
+}
+/* Responsive for mobile devices */
+@media (max-width: 480px) {
+  .login-box {
+    padding: 1.5rem;
+    max-width: 90%; /* take most of the screen width */
+  }
+
+  .login-title {
+    font-size: 1.5rem;
+  }
+
+  .login-btn {
+    padding: 0.7rem;
+    font-size: 0.95rem;
+  }
+
+  .login-input {
+    padding: 0.65rem;
+    font-size: 0.95rem;
+  }
+
+  .toggle-password {
+    font-size: 0.85rem;
+  }
+
+  .login-footer {
+    font-size: 0.9rem;
+  }
+}

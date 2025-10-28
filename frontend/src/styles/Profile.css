@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+
+.profile-page {
+  min-height: 100vh;
+  padding-bottom: 50px;
+}
+
+.profile-title {
+  margin-top: 80px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 2rem;
+  color: #fff;
+}
+
+.profile-subtitle {
+  text-align: center;
+  margin-top: 15px;
+  margin-bottom: 40px;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #bbb;
+}
+
+/* Card */
+.profile-card {
+  background-color: #1E1E1E;
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(255, 165, 0, 0.25);
+  transition: transform 0.3s ease;
+}
+
+.profile-card:hover {
+  transform: translateY(-5px);
+}
+
+.section-heading {
+  color: #FFA500;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* Inputs */
+.form-control {
+  background-color: #1E1E1E;
+  color: #ffffff;
+  border: 1px solid #333333;
+  border-radius: 8px;
+}
+
+.form-control:focus {
+  border-color: #FFA500;
+  box-shadow: 0 0 6px #FFA500;
+}
+
+/* Buttons */
+.btn-warning {
+  background-color: #FFA500;
+  color: #121212;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-warning:hover {
+  background-color: #ffb733;
+  transform: scale(1.05);
+}
+
+.btn-outline-warning {
+  border: 1px solid #FFA500;
+  color: #FFA500;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-warning:hover {
+  background-color: #FFA500;
+  color: #121212;
+  transform: scale(1.05);
+}
+
+/* Profile Picture */
+.profile-pic {
+  width: 250px;
+  height: 250px;
+  object-fit: cover;
+  border: 3px solid #FFA500;
+  transition: all 0.3s ease;
+}
+
+.profile-pic:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 20px rgba(255, 165, 0, 0.5);
+}
+
+/* Name */
+.profile-name {
+  font-size: 22px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #FFA500;
+
+}
+
+/* Info rows */
+.profile-info {
+  max-width: 400px;
+  
+}
+
+.profile-info p {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+  font-size: 15px;
+  color: #ddd;
+}
+
+.profile-info svg {
+  color: #FFA500;
+  font-size: 18px;
+  flex-shrink: 0;
+}

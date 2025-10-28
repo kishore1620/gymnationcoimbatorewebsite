@@ -1,0 +1,118 @@
+// Centralized Gym Pricing Plans
+const plans = [
+  {
+    id: "admission-monthly",        // ✅ Unique ID
+    title: "ADMISSION + MONTHLY",
+    oldPrice: "₹1750",
+    newPrice: "₹1400",
+    icon: "fa-user-circle",
+    highlight: false,
+    features: [
+      { text: "Admission Fees: ₹500" },
+      { text: "Monthly Fees: ₹1250" },
+      { text: "5 Days Access" },
+      { text: "Personal Training", inactive: true },
+      { text: "Group Sessions", inactive: true },
+    ],
+  },
+  {
+    id: "3-month-plan",
+    title: "3 MONTH PLAN",
+    oldPrice: "₹3000",
+    newPrice: "₹2400",
+    icon: "fa-calendar-alt",
+    highlight: false,
+    features: [
+      { text: "3 Months Access" },
+      { text: "Free Diet Guidance" },
+      { text: "Workout Support" },
+      { text: "Trainer Assistance" },
+    ],
+  },
+  {
+    id: "6-months-plus-3-free",
+    title: "6 MONTH PLAN + 3 MONTHS FREE",
+    oldPrice: "₹5000",
+    newPrice: "₹4000",
+    icon: "fa-star",
+    highlight: true,
+    features: [
+      { text: "6 Months Paid + 3 Months Free" },
+      { text: "Free Diet Plan" },
+      { text: "Full Workout Access" },
+      { text: "Video Access" },
+      { text: "Muscle Stretching" },
+    ],
+  },
+  {
+    id: "1-year-plus-1-free",
+    title: "1 YEAR PLAN + 1 YEAR FREE",
+    oldPrice: "₹9000",
+    newPrice: "₹7200",
+    icon: "fa-dumbbell",
+    highlight: false,
+    features: [
+      { text: "12 Months Paid + 12 Months Free" },
+      { text: "Free T-shirt & Bag" },
+      { text: "Daily Training Plan" },
+      { text: "Trainer Support" },
+      { text: "Priority Support" },
+    ],
+  },
+  {
+    id: "treadmill",
+    title: "TREADMILL",
+    oldPrice: "₹500",
+    newPrice: "₹400",
+    icon: "fa-walking",
+    highlight: false,
+    features: [
+      { text: "Unlimited Treadmill Access" },
+      { text: "Free Warm-up Guidance" },
+    ],
+  },
+  {
+    id: "personal-training",
+    title: "PERSONAL TRAINING",
+    oldPrice: "₹5000",
+    newPrice: "₹4000",
+    icon: "fa-user-tie",
+    highlight: false,
+    features: [
+      { text: "One-on-One Training" },
+      { text: "Custom Workout Plan" },
+      { text: "Diet Consultation" },
+      { text: "Progress Tracking" },
+    ],
+  },
+  {
+    id: "personal-training-3-months",
+    title: "PERSONAL TRAINING (3 MONTHS)",
+    oldPrice: "₹12000",
+    newPrice: "₹9600",
+    icon: "fa-user-shield",
+    highlight: false,
+    features: [
+      { text: "3 Months Access" },
+      { text: "Advanced Training" },
+      { text: "Custom Diet Plan" },
+      { text: "Weekly Progress Tracking" },
+    ],
+  },
+  {
+    id: "group-training-3-members",
+    title: "GROUP TRAINING (3 MEMBERS)",
+    oldPrice: "₹12000",
+    newPrice: "₹9600",
+    icon: "fa-users",
+    highlight: false,
+    features: [
+      { text: "3 Members Training" },
+      { text: "Group Motivation" },
+      { text: "Shared Diet Guidance" },
+      { text: "Workout Challenges" },
+    ],
+  },
+];
+
+export default plans;

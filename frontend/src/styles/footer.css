@@ -1,0 +1,58 @@
+footer {
+  background-color: #111;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+}
+
+footer h5 {
+  color: #ff5e00;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+footer a {
+  transition: color 0.3s;
+}
+.list-unstyled  li:hover{
+  text-decoration: underline;
+  color: white;
+
+}
+footer a:hover {
+  color: #ff5e00;
+  text-decoration: underline;
+}
+
+footer input[type="email"] {
+  border-radius: 5px;
+  border: none;
+  padding: 8px 10px;
+  background-color: #222;
+  color: #fff;
+}
+
+footer input::placeholder {
+  color: #ccc;
+}
+
+footer .btn-danger {
+  background-color: #ff5e00;
+  border: none;
+  padding: 8px 12px;
+}
+
+footer .btn-danger:hover {
+  background-color: #e55300;
+}
+
+footer .fs-5:hover {
+  color: #ff5e00;
+}
+
+footer .text-center {
+  border-top: 1px solid #333;
+  padding-top: 20px;
+  margin-top: 20px;
+  font-size: 13px;
+}

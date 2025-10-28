@@ -1,0 +1,32 @@
+/* PurchasePage.css */
+
+/* Confirm Purchase button */
+.purchase-btn {
+  background-color: orangered;
+  color: black;
+  font-weight: 700;
+  letter-spacing: 1px;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.purchase-btn:hover {
+  background-color: #ff4500; /* slightly darker on hover */
+  color: white;
+  transform: scale(1.02);
+  box-shadow: 0 4px 10px rgba(255, 69, 0, 0.4);
+}
+
+/* Back button */
+.back-btn {
+  background-color: orangered;
+  color: black;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  background-color: #ff4500;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(255, 69, 0, 0.4);
+}

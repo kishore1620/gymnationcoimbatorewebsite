@@ -1,0 +1,139 @@
+/* src/styles/Pricing.css */
+
+/* Section Wrapper */
+.pricing-section {
+  padding: 50px 20px;
+  background: black;
+  text-align: center;
+}
+
+.pricing-section p {
+  color: #ee1010;
+  
+}
+
+.pricing-section h3 {
+  font-size: 2rem;
+  color: #ff5e00;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.pricing-section h2 {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 60px;
+  letter-spacing: 1px;
+}
+
+/* Pricing Cards */
+.pricing-card {
+  background: #111;
+  border-radius: 22px;
+  box-shadow: 0 0 25px rgba(255, 94, 0, 0.25);
+  transition: all 0.3s ease;
+  text-align: center;
+  padding: 35px 25px;
+  position: relative;
+  overflow: hidden;
+}
+
+.pricing-card:hover {
+  transform: translateY(-10px) scale(1.03);
+  box-shadow: 0 0 40px rgba(255, 94, 0, 0.4);
+}
+
+/* Title */
+.pricing-card h5 {
+  font-size: 1.6rem;
+  margin: 15px 0;
+  color: #ff5e00;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Price Section */
+.pricing-price {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 12px 0 25px;
+  color: #fff;
+}
+
+.pricing-price s {
+  font-size: 1.1rem;
+  color: #888;
+  margin-right: 10px;
+  opacity: 0.8;
+}
+
+/* Features List */
+.pricing-features {
+  margin: 25px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pricing-features li {
+  margin-bottom: 12px;
+  font-size: 1rem;
+  color: #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pricing-features i {
+  color: #ff5e00;
+  margin-right: 10px;
+  font-size: 1.1rem;
+}
+
+.pricing-features .text-muted {
+  color: #666 !important;
+}
+
+/* Highlighted Card */
+.highlight {
+  border: 2px solid #ff5e00;
+  box-shadow: 0 0 30px rgba(255, 94, 0, 0.6);
+  transform: scale(1.05);
+}
+
+/* 20% OFF Badge */
+.pricing-card::before {
+  content: "20% OFF";
+  position: absolute;
+  top: 15px;
+  right: -40px;
+  background: #ff5e00;
+  color: #fff;
+  font-weight: bold;
+  font-size: 0.85rem;
+  padding: 6px 60px;
+  transform: rotate(45deg);
+  box-shadow: 0 0 10px rgba(255, 94, 0, 0.4);
+}
+
+/* Button */
+.pricing-card button {
+  background: linear-gradient(135deg, #ff5e00, #e14e00);
+  color: white;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 35px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(255, 94, 0, 0.4);
+}
+
+.pricing-card button:hover {
+  background: linear-gradient(135deg, #e14e00, #c84200);
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(255, 94, 0, 0.6);
+}

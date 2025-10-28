@@ -1,0 +1,73 @@
+body {
+  background-color: black;
+  font-family: "Poppins", sans-serif;
+  color: #ffffff;
+}
+
+/* Container */
+.program-container {
+  max-width: 800px;
+  margin: auto;
+}
+
+h2 {
+  padding-bottom: 20px;
+  background: linear-gradient(90deg, #ff0000, #ff5e00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: bold;
+}
+
+/* Form controls */
+/* Input & Select styling */
+.form-select,
+.form-control {
+  background-color: black;
+  /* darker gray instead of pure black */
+  color: #fff;
+  /* white text */
+  border: 1px solid #e60f0fac;
+  border-radius: 8px;
+}
+
+/* Focus state */
+.form-select:focus,
+.form-control:focus {
+  border-color: #ff5e00;
+  box-shadow: 0 0 6px rgba(255, 94, 0, 0.6);
+  background-color: black;
+  color: #fff;
+}
+
+/* Placeholder styling */
+.form-control::placeholder {
+  color: #ff944d;
+  /* soft orange */
+  opacity: 0.8;
+}
+
+/* Button */
+.btn-warning {
+  background-color: #ff5e00;
+  color: black;
+  font-weight: bold;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-warning:hover {
+  background-color: #ff751a;
+  transform: scale(1.03);
+}
+
+/* Workout cards (mobile) */
+.workout-card {
+  background-color: black;
+  border: 1px solid #333;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(255, 94, 0, 0.2);
+}
+
+.workout-card h6 {
+  font-weight: 600;
+}
