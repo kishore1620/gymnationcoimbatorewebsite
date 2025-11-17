@@ -4,7 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { UserContext } from "../context/UserContext";
 import "../styles/Program.css";
 
-// ✅ Calorie burn rates
+// Calorie rates
 const calorieRates = {
   "Bench Press": 7,
   "Incline Dumbbell Press": 7,
@@ -48,7 +48,7 @@ const calorieRates = {
   "Standing Calf Raises": 4,
 };
 
-// ✅ Workouts grouped by type
+// Workouts list for UI
 const workouts = {
   chest: [
     "Bench Press – 4×6",
@@ -104,7 +104,6 @@ const workouts = {
   ],
 };
 
-// ✅ Days of the week
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 const Program = () => {
@@ -114,10 +113,10 @@ const Program = () => {
   const [workoutData, setWorkoutData] = useState({});
   const [editingWorkout, setEditingWorkout] = useState(null);
 
-  // Fetch workouts from backend
+  // Fetch only TODAY's workouts
   useEffect(() => {
+    if (!user?._id) return;
     const fetchWorkouts = async () => {
-      if (!user?._id) return;
       try {
         const res = await fetch(`http://localhost:5000/api/workouts/myworkouts/${user._id}`);
         const data = await res.json();
@@ -129,42 +128,38 @@ const Program = () => {
     fetchWorkouts();
   }, [user]);
 
-  // Calculate calories burned
+  // Calculate calories
   const calcCalories = (exerciseName, sets, reps, weight) => {
     const base = calorieRates[exerciseName] || 5;
     return parseFloat((sets * reps * weight * base * 0.1).toFixed(2));
   };
 
-  // Clear form inputs
   const clearForm = () => {
-    ["sets-input", "reps-input", "weight-input"].forEach(id => {
+    ["sets-input", "reps-input", "weight-input"].forEach((id) => {
       const el = document.getElementById(id);
       if (el) el.value = "";
     });
-    const elExercise = document.getElementById("exercise-select");
-    if (elExercise && workouts[selectedWorkoutType]?.length) elExercise.selectedIndex = 0;
   };
 
-  // Save workout (create or update)
   const handleSaveWorkout = async () => {
-    if (!user?._id) return alert("User not logged in");
-    if (!selectedDay) return alert("Select a day first");
+    if (!selectedDay) return alert("Select a day");
+    if (!user?._id) return alert("Not logged in");
 
     const exercise = document.getElementById("exercise-select")?.value;
     const sets = parseInt(document.getElementById("sets-input")?.value);
     const reps = parseInt(document.getElementById("reps-input")?.value);
     const weight = parseFloat(document.getElementById("weight-input")?.value);
 
-    if (!exercise) return alert("Select an exercise");
-    if (!sets || !reps || !weight) return alert("Enter valid sets, reps & weight");
+    if (!exercise || !sets || !reps || !weight) return alert("Invalid workout details");
 
     const exerciseName = exercise.split(" – ")[0];
     const calories = calcCalories(exerciseName, sets, reps, weight);
+
     const workoutObj = { name: exercise, sets, reps, weight, calories };
 
     try {
+      // UPDATE
       if (editingWorkout) {
-        // Update workout
         const res = await fetch(`http://localhost:5000/api/workouts/${editingWorkout.workoutId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -177,22 +172,23 @@ const Program = () => {
         });
 
         if (res.ok) {
-          setWorkoutData(prev => ({
+          setWorkoutData((prev) => ({
             ...prev,
             [selectedDay]: {
               ...prev[selectedDay],
-              [editingWorkout.type]: prev[selectedDay]?.[editingWorkout.type]?.map(w =>
-                w._id === editingWorkout.workoutId ? { ...w, ...workoutObj, _id: w._id } : w
-              ) || [],
+              [editingWorkout.type]:
+                prev[selectedDay][editingWorkout.type].map((w) =>
+                  w._id === editingWorkout.workoutId ? { ...w, ...workoutObj } : w
+                ),
             },
           }));
           setEditingWorkout(null);
           clearForm();
-        } else console.error("Update failed", await res.text());
+        }
         return;
       }
 
-      // Create new workout
+      // ADD NEW
       const res = await fetch("http://localhost:5000/api/workouts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -207,52 +203,32 @@ const Program = () => {
       if (res.ok) {
         const payload = await res.json();
         const created = payload.workout;
-        setWorkoutData(prev => ({
+
+        setWorkoutData((prev) => ({
           ...prev,
           [selectedDay]: {
             ...prev[selectedDay],
-            [selectedWorkoutType]: Array.isArray(prev[selectedDay]?.[selectedWorkoutType])
-              ? [...prev[selectedDay][selectedWorkoutType], created]
-              : [created],
+            [selectedWorkoutType]: [...(prev[selectedDay]?.[selectedWorkoutType] || []), created],
           },
         }));
         clearForm();
-      } else console.error("Create failed", await res.text());
+      }
     } catch (err) {
       console.error("Save error:", err);
     }
   };
 
-  // Edit workout
   const handleEditWorkout = (workout, type) => {
     setEditingWorkout({ workoutId: workout._id, type });
-    setSelectedWorkoutType(type);
 
-    const elExercise = document.getElementById("exercise-select");
-    const elSets = document.getElementById("sets-input");
-    const elReps = document.getElementById("reps-input");
-    const elWeight = document.getElementById("weight-input");
-
-    if (elExercise) {
-      for (let i = 0; i < elExercise.options.length; i++) {
-        if (elExercise.options[i].value === workout.name) {
-          elExercise.selectedIndex = i;
-          break;
-        }
-      }
-    }
-    if (elSets) elSets.value = workout.sets;
-    if (elReps) elReps.value = workout.reps;
-    if (elWeight) elWeight.value = workout.weight;
-  };
-
-  const handleCancelEdit = () => {
-    setEditingWorkout(null);
-    clearForm();
+    document.getElementById("sets-input").value = workout.sets;
+    document.getElementById("reps-input").value = workout.reps;
+    document.getElementById("weight-input").value = workout.weight;
   };
 
   const handleDeleteWorkout = async (workout, type) => {
     if (!window.confirm("Delete this workout?")) return;
+
     try {
       const res = await fetch(`http://localhost:5000/api/workouts/${workout._id}`, {
         method: "DELETE",
@@ -261,15 +237,14 @@ const Program = () => {
       });
 
       if (res.ok) {
-        setWorkoutData(prev => ({
+        setWorkoutData((prev) => ({
           ...prev,
           [selectedDay]: {
             ...prev[selectedDay],
-            [type]: prev[selectedDay]?.[type]?.filter(w => w._id !== workout._id) || [],
+            [type]: prev[selectedDay][type].filter((w) => w._id !== workout._id),
           },
         }));
-        if (editingWorkout?.workoutId === workout._id) setEditingWorkout(null);
-      } else console.error("Delete failed", await res.text());
+      }
     } catch (err) {
       console.error("Delete error:", err);
     }
@@ -279,77 +254,64 @@ const Program = () => {
     <div className="program-container container py-5">
       <h2 className="text-center mb-4 text-warning">Workout Tracker</h2>
 
-      {/* Day Selector */}
+      {/* Select Day */}
       <div className="mb-3">
-        <label className="form-label text-light">Select Day</label>
-        <select
-          className="form-select"
-          value={selectedDay}
-          onChange={e => setSelectedDay(e.target.value)}
-        >
-          <option value="">--Choose a Day--</option>
-          {days.map(day => (
-            <option key={day} value={day}>{day}</option>
+        <label className="text-light">Select Day</label>
+        <select className="form-select" value={selectedDay} onChange={(e) => setSelectedDay(e.target.value)}>
+          <option value="">-- Choose a day --</option>
+          {days.map((d) => (
+            <option key={d}>{d}</option>
           ))}
         </select>
       </div>
 
-      {/* Workout Type Selector */}
+      {/* Select Type */}
       <div className="mb-3">
-        <label className="form-label text-white">Workout Type</label>
+        <label className="text-light">Workout Type</label>
         <select
           className="form-select"
           value={selectedWorkoutType}
-          onChange={e => setSelectedWorkoutType(e.target.value)}
+          onChange={(e) => setSelectedWorkoutType(e.target.value)}
           disabled={!selectedDay}
         >
-          {Object.keys(workouts).map(type => (
-            <option key={type} value={type}>
-              {type.replace("_", " ").toUpperCase()}
-            </option>
+          {Object.keys(workouts).map((t) => (
+            <option key={t}>{t.replace("_", " ").toUpperCase()}</option>
           ))}
         </select>
       </div>
 
-      {/* Exercise Selector */}
+      {/* Exercise */}
       <div className="mb-3">
-        <label className="form-label text-white">Exercise</label>
-        <select id="exercise-select" className="form-select" disabled={!selectedWorkoutType}>
-          {selectedWorkoutType && workouts[selectedWorkoutType]?.map((ex, i) => (
-            <option key={i} value={ex}>{ex}</option>
+        <label className="text-light">Exercise</label>
+        <select id="exercise-select" className="form-select">
+          {workouts[selectedWorkoutType].map((ex, idx) => (
+            <option key={idx}>{ex}</option>
           ))}
         </select>
       </div>
 
-      {/* Input Fields */}
+      {/* Inputs */}
       <div className="row mb-3">
-        <div className="col-md-4 mb-2">
+        <div className="col-md-4">
           <input id="sets-input" type="number" className="form-control" placeholder="Sets" />
         </div>
-        <div className="col-md-4 mb-2">
+        <div className="col-md-4">
           <input id="reps-input" type="number" className="form-control" placeholder="Reps" />
         </div>
-        <div className="col-md-4 mb-2">
+        <div className="col-md-4">
           <input id="weight-input" type="number" className="form-control" placeholder="Weight (kg)" />
         </div>
       </div>
 
       {/* Buttons */}
-      <div className="d-flex gap-2 mb-4">
-        <button className="btn btn-warning flex-grow-1" onClick={handleSaveWorkout}>
-          {editingWorkout ? "Update Workout" : "Add Workout"}
-        </button>
-        {editingWorkout && (
-          <button className="btn btn-secondary" onClick={handleCancelEdit}>
-            Cancel
-          </button>
-        )}
-      </div>
+      <button onClick={handleSaveWorkout} className="btn btn-warning w-100 mb-3">
+        {editingWorkout ? "Update Workout" : "Add Workout"}
+      </button>
 
-      {/* Workout Table / Cards */}
+      {/* Workout Display */}
       {selectedDay && (
         <>
-          <h4 className="mb-3 text-white">{selectedDay} Workouts</h4>
+          <h4 className="text-light mb-3">{selectedDay} Workouts</h4>
 
           {/* Desktop Table */}
           <div className="d-none d-md-block">
@@ -360,53 +322,59 @@ const Program = () => {
                   <th>Exercise</th>
                   <th>Sets</th>
                   <th>Reps</th>
-                  <th>Weight (kg)</th>
+                  <th>Weight</th>
                   <th>Calories</th>
                   <th>Actions</th>
                 </tr>
               </thead>
+
               <tbody>
-                {Object.keys(workoutData[selectedDay] || {}).map(type => {
-                  const exercises = workoutData[selectedDay]?.[type] || [];
-                  return exercises.map((w, i) => (
-                    <tr key={w?._id || `${type}-${i}`}>
+                {Object.keys(workoutData[selectedDay] || {}).map((type) =>
+                  workoutData[selectedDay][type].map((w, i) => (
+                    <tr key={w._id}>
                       <td>{i + 1}</td>
-                      <td>{w?.name || "-"}</td>
-                      <td>{w?.sets || 0}</td>
-                      <td>{w?.reps || 0}</td>
-                      <td>{w?.weight || 0} kg</td>
-                      <td>{w?.calories || 0} kcal</td>
+                      <td>{w.name}</td>
+                      <td>{w.sets}</td>
+                      <td>{w.reps}</td>
+                      <td>{w.weight} kg</td>
+                      <td>{w.calories} kcal</td>
                       <td>
-                        <button className="btn btn-sm btn-info me-2" onClick={() => handleEditWorkout(w, type)}>Edit</button>
-                        <button className="btn btn-sm btn-danger" onClick={() => handleDeleteWorkout(w, type)}>Delete</button>
+                        <button className="btn btn-info btn-sm me-2" onClick={() => handleEditWorkout(w, type)}>
+                          Edit
+                        </button>
+                        <button className="btn btn-danger btn-sm" onClick={() => handleDeleteWorkout(w, type)}>
+                          Delete
+                        </button>
                       </td>
                     </tr>
-                  ));
-                })}
+                  ))
+                )}
               </tbody>
             </table>
           </div>
 
           {/* Mobile Cards */}
-          <div className="d-md-none workout-cards">
-            {Object.keys(workoutData[selectedDay] || {}).map(type => {
-              const exercises = workoutData[selectedDay]?.[type] || [];
-              return exercises.map((w, i) => (
-                <div className="card workout-card mb-3" key={w?._id || `${type}-${i}`}>
+          <div className="d-md-none">
+            {Object.keys(workoutData[selectedDay] || {}).map((type) =>
+              workoutData[selectedDay][type].map((w, i) => (
+                <div key={w._id} className="card bg-dark text-light mb-3">
                   <div className="card-body">
-                    <h6 className="text-info">{w?.name || "-"}</h6>
-                    <p className="mb-1 text-warning"><strong>Sets:</strong> {w?.sets || 0}</p>
-                    <p className="mb-1 text-warning"><strong>Reps:</strong> {w?.reps || 0}</p>
-                    <p className="mb-1 text-warning"><strong>Weight:</strong> {w?.weight || 0} kg</p>
-                    <p className="mb-0 text-success"><strong>{w?.calories || 0} kcal</strong></p>
-                    <div className="mt-2">
-                      <button className="btn btn-sm btn-info me-2" onClick={() => handleEditWorkout(w, type)}>Edit</button>
-                      <button className="btn btn-sm btn-danger" onClick={() => handleDeleteWorkout(w, type)}>Delete</button>
-                    </div>
+                    <h5 className="text-info">{w.name}</h5>
+                    <p>Sets: {w.sets}</p>
+                    <p>Reps: {w.reps}</p>
+                    <p>Weight: {w.weight} kg</p>
+                    <p className="text-success">{w.calories} kcal</p>
+
+                    <button className="btn btn-info btn-sm me-2" onClick={() => handleEditWorkout(w, type)}>
+                      Edit
+                    </button>
+                    <button className="btn btn-danger btn-sm" onClick={() => handleDeleteWorkout(w, type)}>
+                      Delete
+                    </button>
                   </div>
                 </div>
-              ));
-            })}
+              ))
+            )}
           </div>
         </>
       )}
