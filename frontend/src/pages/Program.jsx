@@ -108,47 +108,73 @@ const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 
 const Program = () => {
   const { user } = useContext(UserContext);
+
+  // UI state
   const [selectedDay, setSelectedDay] = useState("");
   const [selectedWorkoutType, setSelectedWorkoutType] = useState("chest");
-  const [workoutData, setWorkoutData] = useState({});
-  const [editingWorkout, setEditingWorkout] = useState(null);
 
-  // Fetch only TODAY's workouts
+  // backend data
+  // workoutData shape expected: { Monday: { chest: [{...}, ...], back: [...], ... }, Tuesday: { ... } }
+  const [workoutData, setWorkoutData] = useState({});
+
+  // form state (controlled inputs)
+  const [exercise, setExercise] = useState(workouts.chest[0] || "");
+  const [sets, setSets] = useState(4);
+  const [reps, setReps] = useState(8);
+  const [weight, setWeight] = useState(20);
+
+  // editing
+  const [editingWorkout, setEditingWorkout] = useState(null); // { workoutId, type }
+  const [loading, setLoading] = useState(false);
+
+  // Fetch workouts for the user
   useEffect(() => {
     if (!user?._id) return;
     const fetchWorkouts = async () => {
+      setLoading(true);
       try {
         const res = await fetch(`http://localhost:5000/api/workouts/myworkouts/${user._id}`);
+        if (!res.ok) throw new Error(`Status ${res.status}`);
         const data = await res.json();
         setWorkoutData(data || {});
       } catch (err) {
         console.error("Fetch error:", err);
+        setWorkoutData({});
+      } finally {
+        setLoading(false);
       }
     };
     fetchWorkouts();
   }, [user]);
 
+  // keep exercise select in sync when workout type changes
+  useEffect(() => {
+    const list = workouts[selectedWorkoutType];
+    if (list && list.length) setExercise(list[0]);
+    else setExercise("");
+  }, [selectedWorkoutType]);
+
   // Calculate calories
-  const calcCalories = (exerciseName, sets, reps, weight) => {
+  const calcCalories = (exerciseName, s, r, w) => {
     const base = calorieRates[exerciseName] || 5;
-    return parseFloat((sets * reps * weight * base * 0.1).toFixed(2));
+    const setsNum = Number.isFinite(+s) ? +s : 0;
+    const repsNum = Number.isFinite(+r) ? +r : 0;
+    const weightNum = Number.isFinite(+w) ? +w : 0;
+    return parseFloat((setsNum * repsNum * weightNum * base * 0.1).toFixed(2));
   };
 
-  const clearForm = () => {
-    ["sets-input", "reps-input", "weight-input"].forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) el.value = "";
-    });
+  const resetForm = () => {
+    setSets(4);
+    setReps(8);
+    setWeight(20);
+    // keep exercise as-is or reset to first of type
+    const list = workouts[selectedWorkoutType];
+    setExercise(list && list.length ? list[0] : "");
   };
 
   const handleSaveWorkout = async () => {
     if (!selectedDay) return alert("Select a day");
     if (!user?._id) return alert("Not logged in");
-
-    const exercise = document.getElementById("exercise-select")?.value;
-    const sets = parseInt(document.getElementById("sets-input")?.value);
-    const reps = parseInt(document.getElementById("reps-input")?.value);
-    const weight = parseFloat(document.getElementById("weight-input")?.value);
 
     if (!exercise || !sets || !reps || !weight) return alert("Invalid workout details");
 
@@ -163,28 +189,21 @@ const Program = () => {
         const res = await fetch(`http://localhost:5000/api/workouts/${editingWorkout.workoutId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId: user._id,
-            day: selectedDay,
-            type: editingWorkout.type,
-            workout: workoutObj,
-          }),
+          body: JSON.stringify({ userId: user._id, day: selectedDay, type: editingWorkout.type, workout: workoutObj }),
         });
 
-        if (res.ok) {
-          setWorkoutData((prev) => ({
-            ...prev,
-            [selectedDay]: {
-              ...prev[selectedDay],
-              [editingWorkout.type]:
-                prev[selectedDay][editingWorkout.type].map((w) =>
-                  w._id === editingWorkout.workoutId ? { ...w, ...workoutObj } : w
-                ),
-            },
-          }));
-          setEditingWorkout(null);
-          clearForm();
-        }
+        if (!res.ok) throw new Error(`Update failed: ${res.status}`);
+
+        // optimistic update locally
+        setWorkoutData((prev) => {
+          const dayObj = prev[selectedDay] ? { ...prev[selectedDay] } : {};
+          const arr = Array.isArray(dayObj[editingWorkout.type]) ? [...dayObj[editingWorkout.type]] : [];
+          const updatedArr = arr.map((w) => (w._id === editingWorkout.workoutId ? { ...w, ...workoutObj } : w));
+          return { ...prev, [selectedDay]: { ...dayObj, [editingWorkout.type]: updatedArr } };
+        });
+
+        setEditingWorkout(null);
+        resetForm();
         return;
       }
 
@@ -192,43 +211,40 @@ const Program = () => {
       const res = await fetch("http://localhost:5000/api/workouts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: user._id,
-          day: selectedDay,
-          type: selectedWorkoutType,
-          workout: workoutObj,
-        }),
+        body: JSON.stringify({ userId: user._id, day: selectedDay, type: selectedWorkoutType, workout: workoutObj }),
       });
 
-      if (res.ok) {
-        const payload = await res.json();
-        const created = payload.workout;
+      if (!res.ok) throw new Error(`Create failed: ${res.status}`);
 
-        setWorkoutData((prev) => ({
-          ...prev,
-          [selectedDay]: {
-            ...prev[selectedDay],
-            [selectedWorkoutType]: [...(prev[selectedDay]?.[selectedWorkoutType] || []), created],
-          },
-        }));
-        clearForm();
-      }
+      const payload = await res.json();
+      const created = payload.workout;
+
+      setWorkoutData((prev) => {
+        const dayObj = prev[selectedDay] ? { ...prev[selectedDay] } : {};
+        const arr = Array.isArray(dayObj[selectedWorkoutType]) ? [...dayObj[selectedWorkoutType]] : [];
+        return { ...prev, [selectedDay]: { ...dayObj, [selectedWorkoutType]: [...arr, created] } };
+      });
+
+      resetForm();
     } catch (err) {
       console.error("Save error:", err);
+      alert("Could not save workout. See console for details.");
     }
   };
 
   const handleEditWorkout = (workout, type) => {
     setEditingWorkout({ workoutId: workout._id, type });
+    setExercise(workout.name || "");
+    setSets(workout.sets || 4);
+    setReps(workout.reps || 8);
+    setWeight(workout.weight || 20);
 
-    document.getElementById("sets-input").value = workout.sets;
-    document.getElementById("reps-input").value = workout.reps;
-    document.getElementById("weight-input").value = workout.weight;
+    // ensure selected workout type matches the type being edited
+    setSelectedWorkoutType(type);
   };
 
   const handleDeleteWorkout = async (workout, type) => {
     if (!window.confirm("Delete this workout?")) return;
-
     try {
       const res = await fetch(`http://localhost:5000/api/workouts/${workout._id}`, {
         method: "DELETE",
@@ -236,18 +252,24 @@ const Program = () => {
         body: JSON.stringify({ userId: user._id, day: selectedDay, type }),
       });
 
-      if (res.ok) {
-        setWorkoutData((prev) => ({
-          ...prev,
-          [selectedDay]: {
-            ...prev[selectedDay],
-            [type]: prev[selectedDay][type].filter((w) => w._id !== workout._id),
-          },
-        }));
-      }
+      if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
+
+      setWorkoutData((prev) => {
+        const dayObj = prev[selectedDay] ? { ...prev[selectedDay] } : {};
+        const arr = Array.isArray(dayObj[type]) ? dayObj[type].filter((w) => w._id !== workout._id) : [];
+        return { ...prev, [selectedDay]: { ...dayObj, [type]: arr } };
+      });
     } catch (err) {
       console.error("Delete error:", err);
+      alert("Could not delete workout. See console for details.");
     }
+  };
+
+  // helpers to safely iterate over day's types
+  const getDayTypes = () => {
+    if (!selectedDay) return [];
+    const dayObj = workoutData[selectedDay] || {};
+    return Object.keys(dayObj).filter((k) => Array.isArray(dayObj[k]));
   };
 
   return (
@@ -260,7 +282,9 @@ const Program = () => {
         <select className="form-select" value={selectedDay} onChange={(e) => setSelectedDay(e.target.value)}>
           <option value="">-- Choose a day --</option>
           {days.map((d) => (
-            <option key={d}>{d}</option>
+            <option key={d} value={d}>
+              {d}
+            </option>
           ))}
         </select>
       </div>
@@ -275,7 +299,9 @@ const Program = () => {
           disabled={!selectedDay}
         >
           {Object.keys(workouts).map((t) => (
-            <option key={t}>{t.replace("_", " ").toUpperCase()}</option>
+            <option key={t} value={t}>
+              {t.replace("_", " ").toUpperCase()}
+            </option>
           ))}
         </select>
       </div>
@@ -283,28 +309,54 @@ const Program = () => {
       {/* Exercise */}
       <div className="mb-3">
         <label className="text-light">Exercise</label>
-        <select id="exercise-select" className="form-select">
-          {workouts[selectedWorkoutType].map((ex, idx) => (
-            <option key={idx}>{ex}</option>
+        <select id="exercise-select" className="form-select" value={exercise} onChange={(e) => setExercise(e.target.value)}>
+          {(workouts[selectedWorkoutType] || []).map((ex, idx) => (
+            <option key={idx} value={ex}>
+              {ex}
+            </option>
           ))}
         </select>
       </div>
 
       {/* Inputs */}
       <div className="row mb-3">
-        <div className="col-md-4">
-          <input id="sets-input" type="number" className="form-control" placeholder="Sets" />
+        <div className="col-md-4 mb-2">
+          <input
+            id="sets-input"
+            type="number"
+            className="form-control"
+            placeholder="Sets"
+            value={sets}
+            onChange={(e) => setSets(Number(e.target.value))}
+            min={1}
+          />
         </div>
-        <div className="col-md-4">
-          <input id="reps-input" type="number" className="form-control" placeholder="Reps" />
+        <div className="col-md-4 mb-2">
+          <input
+            id="reps-input"
+            type="number"
+            className="form-control"
+            placeholder="Reps"
+            value={reps}
+            onChange={(e) => setReps(Number(e.target.value))}
+            min={1}
+          />
         </div>
-        <div className="col-md-4">
-          <input id="weight-input" type="number" className="form-control" placeholder="Weight (kg)" />
+        <div className="col-md-4 mb-2">
+          <input
+            id="weight-input"
+            type="number"
+            className="form-control"
+            placeholder="Weight (kg)"
+            value={weight}
+            onChange={(e) => setWeight(Number(e.target.value))}
+            min={0}
+          />
         </div>
       </div>
 
       {/* Buttons */}
-      <button onClick={handleSaveWorkout} className="btn btn-warning w-100 mb-3">
+      <button onClick={handleSaveWorkout} className="btn btn-warning w-100 mb-3" disabled={loading}>
         {editingWorkout ? "Update Workout" : "Add Workout"}
       </button>
 
@@ -329,9 +381,15 @@ const Program = () => {
               </thead>
 
               <tbody>
-                {Object.keys(workoutData[selectedDay] || {}).map((type) =>
-                  workoutData[selectedDay][type].map((w, i) => (
-                    <tr key={w._id}>
+                {getDayTypes().length === 0 && (
+                  <tr>
+                    <td colSpan={7}>No workouts for this day yet.</td>
+                  </tr>
+                )}
+
+                {getDayTypes().map((type) =>
+                  (workoutData[selectedDay][type] || []).map((w, i) => (
+                    <tr key={w._id || `${type}-${i}`}>
                       <td>{i + 1}</td>
                       <td>{w.name}</td>
                       <td>{w.sets}</td>
@@ -355,9 +413,11 @@ const Program = () => {
 
           {/* Mobile Cards */}
           <div className="d-md-none">
-            {Object.keys(workoutData[selectedDay] || {}).map((type) =>
-              workoutData[selectedDay][type].map((w, i) => (
-                <div key={w._id} className="card bg-dark text-light mb-3">
+            {getDayTypes().length === 0 && <p className="text-light">No workouts for this day yet.</p>}
+
+            {getDayTypes().map((type) =>
+              (workoutData[selectedDay][type] || []).map((w, i) => (
+                <div key={w._id || `${type}-${i}`} className="card bg-dark text-light mb-3">
                   <div className="card-body">
                     <h5 className="text-info">{w.name}</h5>
                     <p>Sets: {w.sets}</p>
